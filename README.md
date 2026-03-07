@@ -2,6 +2,6 @@
 
 ## Student
 
-- Name: Artem
-- Group: Maruschyk
+- Name: Artem Maruschyk
+- Group: 232/2
   Cередовище для розробки
