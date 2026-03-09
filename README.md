@@ -28,6 +28,7 @@ v25.8.0
 ```
 
 Repository structure
-docker-compose.yml
-Dockerfile
-README.md
+
+- docker-compose.yml
+- Dockerfile
+- README.md
