@@ -55,7 +55,7 @@ PONG
 ```
 
 ## Перевірка застосунку
-
+![Result screen](pr2.png)
 ```text
 Hello World!
 ```
