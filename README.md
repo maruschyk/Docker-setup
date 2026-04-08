@@ -3,74 +3,139 @@
 - Name: Artem Maruschyk
 - Group: 232/2
 
-## Практичне заняття №2 — NestJS + PostgreSQL + Redis
+## Практичне заняття №3 — CRUD REST API для MiniShop
 
-## Структура репозиторію
+### Структура репозиторію
 
 ```
 .
 ├── src/
+│   ├── categories/
+│   │   ├── category.entity.ts
+│   │   ├── categories.module.ts
+│   │   ├── categories.service.ts
+│   │   └── categories.controller.ts
+│   ├── products/
+│   │   ├── product.entity.ts
+│   │   ├── products.module.ts
+│   │   ├── products.service.ts
+│   │   └── products.controller.ts
+│   ├── migrations/
+│   │   ├── 1700000001-CreateTables.ts
+│   │   └── <timestamp>-AddIsActiveToProducts.ts
+│   ├── data-source.ts
+│   └── app.module.ts
 ├── Dockerfile
 ├── docker-compose.yml
-├── .env.example
 └── README.md
-
 ```
 
-## Запуск проекту
+### Запуск проекту
 
 ```bash
-cp .env.example .env   # налаштувати значення
+cp .env.example .env
 docker compose up --build
 ```
 
-## Перевірка сервісів
+### API Endpoints
+
+| Method | URL                 | Опис               |
+| ------ | ------------------- | ------------------ |
+| GET    | /api/categories     | Список категорій   |
+| GET    | /api/categories/:id | Одна категорія     |
+| POST   | /api/categories     | Створити категорію |
+| PATCH  | /api/categories/:id | Оновити категорію  |
+| DELETE | /api/categories/:id | Видалити категорію |
+| GET    | /api/products       | Список продуктів   |
+| GET    | /api/products/:id   | Один продукт       |
+| POST   | /api/products       | Створити продукт   |
+| PATCH  | /api/products/:id   | Оновити продукт    |
+| DELETE | /api/products/:id   | Видалити продукт   |
+
+### Перевірка міграцій
 
 ```text
-NAME                      IMAGE                COMMAND                  SERVICE    CREATED          STATUS                    PORTS
-docker-setup-app-1        docker-setup-app     "docker-entrypoint.s…"   app        23 minutes ago   Up 19 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
-docker-setup-postgres-1   postgres:16-alpine   "docker-entrypoint.s…"   postgres   23 minutes ago   Up 21 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
-docker-setup-redis-1      redis:7-alpine       "docker-entrypoint.s…"   redis      23 minutes ago   Up 21 minutes (healthy)   0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+<вивід docker compose exec postgres psql -U nestuser -d nestdb -c "\dt">
 ```
 
-## Перевірка PostgreSQL
+### Тест створення категорії
 
 ```text
+id name        description createdAt
+-- ----        ----------- ---------
+ 1 Electronics Gadgets     2026-04-08T18:58:04.684Z
 
-   Name    |  Owner   | Encoding | Locale Provider |  Collate   |   Ctype    | ICU Locale | ICU Rules |   Access privileges
------------+----------+----------+-----------------+------------+------------+------------+-----------+-----------------------
- nestdb    | nestuser | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           |
- postgres  | nestuser | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           |
- template0 | nestuser | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/nestuser          +
-           |          |          |                 |            |            |            |           | nestuser=CTc/nestuser
- template1 | nestuser | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/nestuser          +
-           |          |          |                 |            |            |            |           | nestuser=CTc/nestuser
+id name        description createdAt
+-- ----        ----------- ---------
+ 2 Accessories             2026-04-08T19:00:04.649Z
 ```
 
-## Перевірка Redis
+### Тест створення продукту
 
 ```text
+id          : 1
+name        : iPhone 15
+description :
+price       : 999,99
+stock       : 50
+isActive    : True
+category    : @{id=1}
+createdAt   : 2026-04-08T19:01:25.166Z
+updatedAt   : 2026-04-08T19:01:25.166Z
 
-PONG
+id          : 2
+name        : USB Cable
+description :
+price       : 9,99
+stock       : 200
+isActive    : True
+category    :
+createdAt   : 2026-04-08T19:02:01.749Z
+updatedAt   : 2026-04-08T19:02:01.749Z
 ```
 
-## Перевірка застосунку
-![Result screen](pr2.png)
+### Тест отримання продуктів
+
 ```text
-Hello World!
+id          : 1
+name        : iPhone 15
+description :
+price       : 999.99
+stock       : 50
+isActive    : True
+category    : @{id=1; name=Electronics; description=Gadgets; createdAt=2026-04-08T18:58:04.684Z}
+createdAt   : 2026-04-08T19:01:25.166Z
+updatedAt   : 2026-04-08T19:01:25.166Z
+
+id          : 2
+name        : USB Cable
+description :
+price       : 9.99
+stock       : 200
+isActive    : True
+category    :
+createdAt   : 2026-04-08T19:02:01.749Z
+updatedAt   : 2026-04-08T19:02:01.749Z
+
+id          : 1
+name        : iPhone 15
+description :
+price       : 999.99
+stock       : 50
+isActive    : True
+category    : @{id=1; name=Electronics; description=Gadgets; createdAt=2026-04-08T18:58:04.684Z}
+createdAt   : 2026-04-08T19:01:25.166Z
+updatedAt   : 2026-04-08T19:01:25.166Z
 ```
 
-## Логи NestJS (фрагмент)
+### Тест 404
 
 ```text
-app-1  | [Nest] 29  - 03/30/2026, 9:12:51 PM     LOG [NestFactory] Starting Nest application...
-app-1  | [Nest] 29  - 03/30/2026, 9:12:51 PM     LOG [InstanceLoader] TypeOrmModule dependencies initialized +166ms
-app-1  | [Nest] 29  - 03/30/2026, 9:12:51 PM     LOG [InstanceLoader] ConfigHostModule dependencies initialized +2ms
-app-1  | [Nest] 29  - 03/30/2026, 9:12:51 PM     LOG [InstanceLoader] AppModule dependencies initialized +0ms
-app-1  | [Nest] 29  - 03/30/2026, 9:12:51 PM     LOG [InstanceLoader] ConfigModule dependencies initialized +1ms
-app-1  | [Nest] 29  - 03/30/2026, 9:12:51 PM     LOG [InstanceLoader] CacheModule dependencies initialized +62ms
-app-1  | [Nest] 29  - 03/30/2026, 9:12:52 PM     LOG [InstanceLoader] TypeOrmCoreModule dependencies initialized +67ms
-app-1  | [Nest] 29  - 03/30/2026, 9:12:52 PM     LOG [RoutesResolver] AppController {/}: +11ms
-app-1  | [Nest] 29  - 03/30/2026, 9:12:52 PM     LOG [RouterExplorer] Mapped {/, GET} route +8ms
-app-1  | [Nest] 29  - 03/30/2026, 9:12:52 PM     LOG [NestApplication] Nest application successfully started +6ms
+Invoke-RestMethod : {"message":"Product #999 not found","error":"Not Found","statusCode":404}
+At line:1 char:1
++ Invoke-RestMethod http://localhost:3000/api/products/999
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (System.Net.HttpWebRequest:HttpWebRequest) [Invoke-RestMethod], WebExc
+   eption
+    + FullyQualifiedErrorId : WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeRestMethodCommand
 ```
