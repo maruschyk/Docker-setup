@@ -3,11 +3,7 @@
 - Name: Artem Maruschyk
 - Group: 232/2
 
-## Практичне заняття №3 — CRUD REST API для MiniShop
 
-### Структура репозиторію
-
-````
 ## Практичне заняття №4 — DTO + class-validator + Pipes
 
 ### Структура репозиторію
