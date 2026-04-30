@@ -3,61 +3,88 @@
 - Name: Artem Maruschyk
 - Group: 232/2
 
-
-## Практичне заняття №4 — DTO + class-validator + Pipes
+## Практичне заняття №5 — JWT Authentication + Guards + RBAC
 
 ### Структура репозиторію
 
+```
+.
 ├── src/
-│ ├── categories/
-│ │ ├── dto/
-│ │ │ ├── create-category.dto.ts
-│ │ │ └── update-category.dto.ts
-│ │ ├── category.entity.ts
-│ │ ├── categories.module.ts
-│ │ ├── categories.service.ts
-│ │ └── categories.controller.ts
-│ ├── products/
-│ │ ├── dto/
-│ │ │ ├── create-product.dto.ts
-│ │ │ └── update-product.dto.ts
-│ │ ├── product.entity.ts
-│ │ ├── products.module.ts
-│ │ ├── products.service.ts
-│ │ └── products.controller.ts
-│ ├── common/
-│ │ └── pipes/
-│ │ └── trim.pipe.ts
-│ ├── migrations/
-│ ├── data-source.ts
-│ ├── main.ts
-│ └── app.module.ts
+│   ├── auth/
+│   │   ├── dto/
+│   │   │   ├── register.dto.ts
+│   │   │   └── login.dto.ts
+│   │   ├── auth.module.ts
+│   │   ├── auth.service.ts
+│   │   └── auth.controller.ts
+│   ├── users/
+│   │   ├── user.entity.ts
+│   │   ├── users.module.ts
+│   │   └── users.service.ts
+│   ├── common/
+│   │   ├── enums/
+│   │   │   └── role.enum.ts
+│   │   ├── guards/
+│   │   │   ├── jwt-auth.guard.ts
+│   │   │   └── roles.guard.ts
+│   │   ├── decorators/
+│   │   │   ├── current-user.decorator.ts
+│   │   │   └── roles.decorator.ts
+│   │   └── pipes/
+│   │   	└── trim.pipe.ts
+│   ├── categories/ ...
+│   ├── products/ ...
+│   ├── migrations/
+│   ├── data-source.ts
+│   ├── main.ts
+│   └── app.module.ts
 ├── Dockerfile
 ├── docker-compose.yml
 └── README.md
----
+```
 
 ### Запуск проекту
+
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-### Тест валідації — порожнє ім'я категорії
+### API Endpoints
+
+| Method | URL               | Auth | Role  |
+| ------ | ----------------- | ---- | ----- |
+| POST   | /auth/register    | none | -     |
+| POST   | /auth/login       | none | -     |
+| GET    | /api/categories   | none | -     |
+| POST   | /api/categories   | JWT  | admin |
+| GET    | /api/products     | none | -     |
+| POST   | /api/products     | JWT  | admin |
+| PATCH  | /api/products/:id | JWT  | admin |
+| DELETE | /api/products/:id | JWT  | admin |
+
+### Тест реєстрації
+
 ```text
-Invoke-RestMethod : {"message":["name must be longer than or equal to 2 characters"],"error":"Bad Request","statusCode"
-:400}
-At line:1 char:1
-+ Invoke-RestMethod -Uri "http://localhost:3000/api/categories" `
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidOperation: (System.Net.HttpWebRequest:HttpWebRequest) [Invoke-RestMethod], WebExc
-   eption
-    + FullyQualifiedErrorId : WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeRestMethodCommand>
+id        : 2
+email     : user@test.com
+name      : Test User
+role      : user
+createdAt : 2026-04-30T13:56:11.712Z
 ```
 
-### Тест валідації — від'ємна ціна продукту
+### Тест логіну
+
 ```text
-Invoke-RestMethod : {"message":["price must not be less than 0.01"],"error":"Bad Request","statusCode":400}
+accessToken
+-----------
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoidXNlckB0ZXN0LmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc3NTU...
+```
+
+### Тест 401 — запит без токена
+
+```text
+Invoke-RestMethod : {"message":"Missing authorization token","error":"Unauthorized","statusCode":401}
 At line:1 char:1
 + Invoke-RestMethod -Uri "http://localhost:3000/api/products" `
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,35 +93,29 @@ At line:1 char:1
     + FullyQualifiedErrorId : WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeRestMethodCommand
 ```
 
-### Тест валідації — зайве поле
+### Тест 403 — запит з роллю user
+
 ```text
-Invoke-RestMethod : {"message":["property isAdmin should not exist"],"error":"Bad Request","statusCode":400}
+Invoke-RestMethod : {"message":"Insufficient permissions","error":"Forbidden","statusCode":403}
 At line:1 char:1
-+ Invoke-RestMethod -Uri "http://localhost:3000/api/categories" `
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++ Invoke-RestMethod -Uri "http://localhost:3000/api/products" `
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : InvalidOperation: (System.Net.HttpWebRequest:HttpWebRequest) [Invoke-RestMethod], WebExc
    eption
-    + FullyQualifiedErrorId : WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeRestMethodCommand>
+    + FullyQualifiedErrorId : WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeRestMethodCommand
 ```
 
-### Тест TrimPipe
-```text
-id name        description createdAt
--- ----        ----------- ---------
- 3   Trimmed               2026-04-24T21:49:21.275Z
+### Тест успішного створення від admin
 
-```
-
-### Тест валідне створення продукту
 ```text
 id          : 1
-name        : iPhone 16
+name        : MacBook Pro
 description :
-price       : 999,99
-stock       : 50
+price       : 2499,99
+stock       : 10
 isActive    : True
-category    : @{id=1}
-createdAt   : 2026-04-24T21:50:35.513Z
-updatedAt   : 2026-04-24T21:50:35.513Z
+createdAt   : 2026-04-30T14:00:19.058Z
+updatedAt   : 2026-04-30T14:00:19.058Z
+
+
 ```
-````
