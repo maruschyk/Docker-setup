@@ -15,6 +15,10 @@ import { AddIsActiveToProducts1775671627458 } from './migrations/1775671627458-A
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { UsersModule } from './users/users.module';
+import { User } from './users/user.entity';
+import { CreateUsers1777555578280 } from './migrations/1777555578280-CreateUsers';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -28,11 +32,12 @@ import { AppService } from './app.service';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
 
-      entities: [Category, Product],
+      entities: [User, Category, Product],
       synchronize: false,
       migrationsRun: true,
 
       migrations: [
+        CreateUsers1777555578280,
         CreateTables1700000001000,
         AddIsActiveToProducts1775671627458,
       ],
@@ -50,7 +55,8 @@ import { AppService } from './app.service';
         ttl: 60 * 1000,
       }),
     }),
-
+    AuthModule,
+    UsersModule,
     CategoriesModule,
     ProductsModule,
   ],
