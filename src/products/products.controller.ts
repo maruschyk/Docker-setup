@@ -21,7 +21,6 @@ import { Role } from '../common/enums/role.enum';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  // Публічні ендпоінти — без Guard
   @Get()
   findAll() {
     return this.productsService.findAll();
