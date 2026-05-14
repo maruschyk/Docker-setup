@@ -49,10 +49,10 @@ import { AuthModule } from './auth/auth.module';
         store: await redisStore({
           socket: {
             host: process.env.REDIS_HOST,
-            port: parseInt(process.env.REDIS_PORT!, 10),
+            port: parseInt(process.env.REDIS_PORT ?? '6379'),
           },
         }),
-        ttl: 60 * 1000,
+        ttl: 60_000,
       }),
     }),
     AuthModule,
