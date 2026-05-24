@@ -1,8 +1,6 @@
 import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
-
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-
 import { OrderStatus } from '../../common/enums/order-status.enum';
 
 export class OrderQueryDto {
