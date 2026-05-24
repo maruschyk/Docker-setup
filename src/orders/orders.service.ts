@@ -8,20 +8,14 @@ import {
 
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
-
 import { Cache } from 'cache-manager';
-
 import { Repository, DataSource } from 'typeorm';
-
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
-
 import { Product } from '../products/product.entity';
-
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrderQueryDto } from './dto/order-query.dto';
-
 import { OrderStatus } from '../common/enums/order-status.enum';
 import { Role } from '../common/enums/role.enum';
 
@@ -71,7 +65,7 @@ export class OrdersService {
           );
         }
 
-        // decrease stock
+        //decrease stock
         product.stock -= item.quantity;
 
         await qr.manager.save(product);
