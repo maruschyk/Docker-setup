@@ -3,9 +3,20 @@
 - Name: Artem Maruschyk
 - Group: 232/2
 
-## Практичне заняття №7 — Redis + Pagination + Filtering
+## MiniShop API — Фінальний проєкт
 
-### Запуск проекту
+REST API інтернет-магазину на NestJS + PostgreSQL + Redis.
+
+### Технології
+
+- NestJS + TypeScript
+- PostgreSQL + TypeORM (міграції, QueryBuilder)
+- Redis (кешування з інвалідацією)
+- JWT автентифікація + RBAC авторизація
+- class-validator + class-transformer
+- Swagger / OpenAPI
+
+### Запуск
 
 ```bash
 cp .env.example .env
@@ -13,63 +24,101 @@ docker compose up --build
 docker compose run --rm app npm run seed
 ```
 
-### API: GET /api/products
+### Swagger UI
 
-| Параметр   | Тип      | Default   | Опис                            |
-| ---------- | -------- | --------- | ------------------------------- |
-| page       | number   | 1         | Номер сторінки                  |
-| pageSize   | number   | 10        | Елементів на сторінку (max 100) |
-| sort       | string   | createdAt | Поле сортування                 |
-| order      | asc/desc | desc      | Напрямок                        |
-| categoryId | number   | -         | Фільтр за категорією            |
-| minPrice   | number   | -         | Мінімальна ціна                 |
-| maxPrice   | number   | -         | Максимальна ціна                |
-| search     | string   | -         | Пошук за назвою (ILIKE)         |
+http://localhost:3000/api/docs
 
-### Тест пагінації
+### API Endpoints
+
+#### Auth
+
+| Method | URL            | Auth | Опис        |
+| ------ | -------------- | ---- | ----------- |
+| POST   | /auth/register | -    | Реєстрація  |
+| POST   | /auth/login    | -    | Логін → JWT |
+
+#### Categories
+
+| Method | URL                 | Auth  | Опис     |
+| ------ | ------------------- | ----- | -------- |
+| GET    | /api/categories     | -     | Список   |
+| GET    | /api/categories/:id | -     | Одна     |
+| POST   | /api/categories     | admin | Створити |
+| PATCH  | /api/categories/:id | admin | Оновити  |
+| DELETE | /api/categories/:id | admin | Видалити |
+
+#### Products
+
+| Method | URL               | Auth  | Опис                         |
+| ------ | ----------------- | ----- | ---------------------------- |
+| GET    | /api/products     | -     | Список + pagination + filter |
+| GET    | /api/products/:id | -     | Один                         |
+| POST   | /api/products     | admin | Створити                     |
+| PATCH  | /api/products/:id | admin | Оновити                      |
+| DELETE | /api/products/:id | admin | Видалити                     |
+
+#### Orders
+
+| Method | URL                    | Auth  | Опис                |
+| ------ | ---------------------- | ----- | ------------------- |
+| POST   | /api/orders            | user  | Створити замовлення |
+| GET    | /api/orders            | user  | Мої / Всі (admin)   |
+| GET    | /api/orders/:id        | user  | Одне (ownership)    |
+| PATCH  | /api/orders/:id/status | admin | Змінити статус      |
+| DELETE | /api/orders/:id        | admin | Видалити            |
+
+### Тест створення замовлення
 
 ```text
-Invoke-RestMethod "http://localhost:3000/api/products?page=1&pageSize=5"
-
-data                            statusCode timestamp
-----                            ---------- ---------
-@{items=System.Object[]; meta=}        200 2026-05-14T20:22:18.267Z
+{
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    },
+    {
+      "productId": 5,
+      "quantity": 1
+    }
+  ]
+}
 ```
 
-### Тест фільтрації
+### Тест ownership (403)
 
 ```text
-Invoke-RestMethod "http://localhost:3000/api/products?categoryId=1&minPrice=500"
-
-data                            statusCode timestamp
-----                            ---------- ---------
-@{items=System.Object[]; meta=}        200 2026-05-14T20:22:38.835Z
-
+{
+  "error": {
+    "code": 401,
+    "message": "Invalid token",
+    "traceId": "305c171d-cae6-47f6-9001-d04885d90dea"
+  },
+  "timestamp": "2026-05-24T20:18:37.546Z"
+}
 ```
 
-### Тест пошуку
+### Тест зміни статусу
 
 ```text
-Invoke-RestMethod "http://localhost:3000/api/products?search=mac"
-
-data                            statusCode timestamp
-----                            ---------- ---------
-@{items=System.Object[]; meta=}        200 2026-05-14T20:22:56.074Z
+{
+  "error": {
+    "code": 403,
+    "message": "Access denied",
+    "traceId": "39bef63d-bbc7-46a1-85d9-57a169fa8a4b"
+  },
+  "timestamp": "2026-05-24T20:23:57.167Z"
+}
 ```
 
-### Тест кешування (Redis)
+### Тест insufficient stock
 
 ```text
-docker compose exec redis redis-cli KEYS "products:*"
-(empty array)
-```
-
-### Тест інвалідації кешу
-
-```text
-docker compose exec redis redis-cli KEYS "*"
-(empty array)
-
-docker compose exec redis redis-cli KEYS "products:*"
-(empty array)
+{
+  "error": {
+    "code": 400,
+    "message": "Insufficient stock for \"MacBook Pro\": available 10, requested 99",
+    "traceId": "3be68892-5382-471b-abe0-70bd51dcb9f2"
+  },
+  "timestamp": "2026-05-24T20:40:38.755Z"
+}
 ```

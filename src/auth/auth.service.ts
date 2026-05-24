@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { Role } from '../common/enums/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,7 @@ export class AuthService {
       email: dto.email,
       passwordHash,
       name: dto.name,
+      role: Role.USER,
     });
 
     // 4. Повернути без хешу пароля

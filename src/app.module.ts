@@ -20,6 +20,9 @@ import { User } from './users/user.entity';
 import { CreateUsers1777555578280 } from './migrations/1777555578280-CreateUsers';
 import { AuthModule } from './auth/auth.module';
 
+import { Order } from './orders/entities/order.entity';
+import { OrderItem } from './orders/entities/order-item.entity';
+import { OrdersModule } from './orders/orders.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -32,7 +35,7 @@ import { AuthModule } from './auth/auth.module';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
 
-      entities: [User, Category, Product],
+      entities: [User, Product, Category, Order, OrderItem],
       synchronize: false,
       migrationsRun: true,
 
@@ -59,6 +62,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     CategoriesModule,
     ProductsModule,
+    OrdersModule,
   ],
 
   controllers: [AppController],
