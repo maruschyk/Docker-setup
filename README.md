@@ -62,7 +62,7 @@ http://localhost:3000/api/docs
 | Method | URL                    | Auth  | Опис                |
 | ------ | ---------------------- | ----- | ------------------- |
 | POST   | /api/orders            | user  | Створити замовлення |
-| GET    | /api/orders            | user  | Мої / Всі (admin)   |
+| GET    | /api/orders            | user  | Мої/ Всі (admin)    |
 | GET    | /api/orders/:id        | user  | Одне (ownership)    |
 | PATCH  | /api/orders/:id/status | admin | Змінити статус      |
 | DELETE | /api/orders/:id        | admin | Видалити            |
